@@ -1,4 +1,4 @@
-
+import numpy as np
 def periodic_noise(shape, C, A=None, B=None):
     """
     generate periodic noise arrays(r:spatial domain,R:frequency domain)
@@ -10,20 +10,22 @@ def periodic_noise(shape, C, A=None, B=None):
 
         """
     "--------------------------Spatial domain--------------------------"
-    L = C.shape[0]
-
     M = shape[0]
     N = shape[1]
 
+    D = 30 * np.sqrt(2)
+    u = np.array((D * np.cos(C * np.pi / 180) + M // 2).astype(int))
+    v = (D * np.sin(C * np.pi / 180) + N // 2).astype(int)
 
-    x, y = np.mgrid[:M, :N].astype('float32')
-    u0, v0 = 30, 30
-    r = np.zeros(C.size)
+    if A == None: A = np.ones(C.shape)
+    if B == None: B = np.zeros(C.size)
 
-    for i in range(L):
+    R = np.zeros(shape, dtype=complex)
 
-        r= A[i] * np.sin(2 * np.pi * (C[i, 0] * (x + B[i, 0]) / M + C[i, 1] * (y + B[i, 1]) / N))
-        print(r[i])
-        print('\n')
+    for i in range(C.size):
+        R[u, v] = 1j * (A[i] / 2) * M * N * np.exp(0)
+    r = np.real(np.fft.ifft2(np.fft.ifftshift(R)))
+    return r, R
 
-    return r
+
+

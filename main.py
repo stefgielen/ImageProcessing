@@ -11,6 +11,7 @@ import imageio as iio
 import numpy as np
 from cband_filter import cband_filter
 from skimage.morphology import square, dilation
+from periodic_noise import periodic_noise
 
 "--------------------------Periodic noise-------------------------"
 
@@ -53,22 +54,14 @@ img = util.img_as_float(img)
 M, N = img.shape
 thetas = np.array([0,60,120])
 
-D = 30 * np.sqrt(2)
-u =np.array((D * np.cos(thetas * np.pi / 180) + M // 2).astype(int))
-v = (D * np.sin(thetas * np.pi / 180) + N // 2).astype(int)
 
-A = np.ones(thetas.size)
-R = np.zeros(img.shape, dtype=complex)
-for i in range(thetas.size):
-    R[u, v] = 1j * (A[i]/2) * M * N * np.exp(0)
-r = np.real(np.fft.ifft2(np.fft.ifftshift(R)))
+r, R = periodic_noise(img.shape, thetas)
 g = img + r/3
 #plt.figure();plt.axis('off');plt.imshow(g, cmap='gray')
 
 G = np.fft.fftshift(np.fft.fft2(g))
 Gd = dilation(np.log(1+np.abs(G)), square(3))
 plt.figure();plt.axis('off');plt.imshow(Gd, cmap='gray')
-
 
 xy = np.array(plt.ginput(-1, show_clicks=True))
 #plt.show()
