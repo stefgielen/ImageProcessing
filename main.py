@@ -48,6 +48,7 @@ cv.imshow('1',img + r[2])
 cv.waitKey(0)
 """
 "--------------------------Periodic noise-------------------------"
+"""
 img = iio.imread('/Users/stefgielen/Documents/school 2021-2022/SEM2/image processing/Oefeningen/imgs/Apollo17boulder.tif')
 img = util.img_as_float(img)
 
@@ -83,3 +84,5 @@ plt.plot();plt.axis('off');plt.imshow(H)
 plt.show()
 plt.plot();plt.axis('off');plt.imshow(g2)
 plt.show()
+"""
+print("hallokes")
