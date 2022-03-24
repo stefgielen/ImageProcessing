@@ -34,12 +34,15 @@ def cnotch_filter(shape=None, centers=None, ftype='ideal', reject=True, D0=0, n=
         H_single_pos = hpcfilter(shape,D0=D0,n=n,ftype=ftype, center=element)
         H_single_neg = hpcfilter(shape, D0=D0,n=n, ftype=ftype, center=(element[0]*(-1),element[1]*(-1)))
         H = H*H_single_pos*H_single_neg
-    return H
+    if(reject):
+        return H
+    else:
+        return 1-H
 
 """
 functie testen
 """
-"""
+
 img = iio.imread('./imgs/imgs/SEMintegratedcircuit.jpg')
 img = util.img_as_float(img)
 
@@ -75,4 +78,3 @@ plt.plot();plt.axis('off');plt.imshow(H)
 plt.show()
 plt.plot();plt.axis('off');plt.imshow(g2)
 plt.show()
-"""
