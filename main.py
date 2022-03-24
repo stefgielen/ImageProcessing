@@ -48,14 +48,12 @@ cv.imshow('1',img + r[2])
 cv.waitKey(0)
 """
 "--------------------------Periodic noise-------------------------"
-"""
+
 img = iio.imread('/Users/stefgielen/Documents/school 2021-2022/SEM2/image processing/Oefeningen/imgs/Apollo17boulder.tif')
 img = util.img_as_float(img)
 
 M, N = img.shape
-thetas = np.array([0,60,120])
-
-
+thetas = np.array([[-20, -20], [24, 44]])
 r, R = periodic_noise(img.shape, thetas)
 g = img + r/3
 #plt.figure();plt.axis('off');plt.imshow(g, cmap='gray')
@@ -65,10 +63,10 @@ Gd = dilation(np.log(1+np.abs(G)), square(3))
 plt.figure();plt.axis('off');plt.imshow(Gd, cmap='gray')
 
 xy = np.array(plt.ginput(-1, show_clicks=True))
-#plt.show()
-rc = xy[:,::-1]
+plt.show()
+rc = xy[:, ::-1]
 
-center=np.array(img.shape)//2
+center = np.array(img.shape)//2
 rc = rc-center
 D0 = (np.sum(rc**2,axis=1)**0.5).mean()
 H = cband_filter(img.shape, D0, ftype='gaussian',reject=True,W=3)
@@ -84,5 +82,3 @@ plt.plot();plt.axis('off');plt.imshow(H)
 plt.show()
 plt.plot();plt.axis('off');plt.imshow(g2)
 plt.show()
-"""
-print("hallokes")
