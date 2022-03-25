@@ -8,12 +8,13 @@ def dftfilt(f, H, pad=False):
     :param pad: using padding before filtering (if pad = True: H.shape should be 2*image.shape
     return: filtered image g
     """
+    r, c = f.shape
     if pad:
-        f = np.pad(f, ((f.shape[0]//2), (0,  f.shape[1])), 'constant')
+        f = np.pad(f, ((r//2, r//2), (c//2, c//2)), 'constant')
         F = np.fft.fftshift(np.fft.fft2(f))
         G = F * H
         g = np.real(np.fft.ifft2(np.fft.ifftshift(G)))
-        g = g[:f.shape[0]//2, :f.shape[1]//2]
+        g = g[r//2:3 * (r //2), c//2:3 * (c //2)]
     else:
         F = np.fft.fftshift(np.fft.fft2(f))
         G = F * H
