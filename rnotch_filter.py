@@ -56,7 +56,7 @@ def rnotch_filter(shape, D0=0, angle=0, ftype='ideal', reject=True, W=1, n=1):
 
     H = np.array(H).prod(axis=0)
 
-    if (reject == False):
+    if not reject:
         H = np.abs(1 - H)
     return H
 """
