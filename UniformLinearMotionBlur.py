@@ -29,7 +29,7 @@ def linearmotionblurfilter(shape, length=1, angle=0, domain='spatial'):
 
 # Main
 # Hlm filter
-img = color.rgb2gray(io.imread('imgs\daenerys.jpg'))
+img = color.rgb2gray(io.imread('imgs/daenerys.jpg'))
 img[300, 600] = 0
 a, b, T = 0.02, 0.02, 1
 r, c = img.shape
@@ -46,3 +46,4 @@ plt.show()
 psf = np.real(fftshift(ifft2(fftshift(Hlm))))
 plt.imshow(psf, cmap='gray')
 plt.show()
+

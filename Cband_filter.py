@@ -35,10 +35,9 @@ def cband_filter(shape, D0, ftype='ideal', reject=True, W=1, n=1):
         H = 1 - H
     return H
 
-
+"""
 "--------------------------testcode-------------------------"
-img = iio.imread(
-    '/Users/stefgielen/Documents/school 2021-2022/SEM2/image processing/Oefeningen/imgs/Apollo17boulder.tif')
+img = iio.imread('imgs/Apollo17boulder.tif')
 img = util.img_as_float(img)
 
 M, N = img.shape
@@ -69,3 +68,4 @@ for k in filters:
     cbandPlots.append(H); cbandTitles.append(k + ' filter')
     cbandPlots.append(g2); cbandTitles.append(k + ' filtered image')
 plot_figures('Cband filter', np.array(cbandPlots), cbandTitles, rowSize=3)
+"""

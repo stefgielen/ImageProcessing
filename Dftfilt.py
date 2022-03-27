@@ -28,7 +28,7 @@ def dftfilt(f, H, pad=False):
         g = np.real(np.fft.ifft2(np.fft.ifftshift(G)))
     return g
 
-
+"""
 img = iio.imread('imgs/obelix.tif')
 img = util.img_as_float(img)
     #filter zonder padding
@@ -45,3 +45,4 @@ dftPlots.append(img); dftTitles.append('original')
 dftPlots.append(g); dftTitles.append('gaussian filter no padding')
 dftPlots.append(gp); dftTitles.append('gaussian filter with padding')
 plot_figures('Dft filter function', np.array(dftPlots), dftTitles, rowSize=1)
+"""

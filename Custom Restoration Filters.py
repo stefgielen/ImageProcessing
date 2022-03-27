@@ -1,18 +1,11 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[29]:
-
-
 #custom restoration filters
+import numpy as np
 import scipy
-import skimage
 import imageio as io
 import matplotlib.pyplot as plt
 from skimage import restoration, util
-from dftfilt import dftfilt
-from lpcfilter import lpcfilter
-#from my_module import dftfilt,lpcfilter
+from Dftfilt import dftfilt
+from basic_filters import lpcfilter
 
 def get_inv_H(H,cutoff=None, eps=1e-16):
     Hc= np.clip(H,eps,None)
@@ -39,11 +32,6 @@ def get_wiener_H(H,k=1,Sn=None,Sf=None):
 def get_geomean_H(H,alpha=1,beta=1,Sn=None,Sf=None):
     Hg=((np.conj(H)/np.abs(H**2))**alpha)*(np.conj(H)/(np.abs(H**2)+beta*(Sn/Sf)))**(1-alpha)
     return Hg
-
-
-
-
-# In[30]:
 
 
 img = io.imread('imgs/obelix.tif')
@@ -98,4 +86,5 @@ axes[0].set_title('Restored noisy image  via GMF'.format(x))
 axes[1].imshow(fnm_eg,cmap='gray')
 axes[1].axis('off');
 axes[1].set_title('Restored denoised image via GMF'.format(x))
+plt.show()
 
