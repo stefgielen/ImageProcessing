@@ -12,7 +12,7 @@ from skimage import io
 from skimage import util
 import imageio as iio
 import numpy as np
-from cband_filter import cband_filter
+from Cband_filter import cband_filter
 from skimage.morphology import square, dilation
 from periodic_noise import periodic_noise
 

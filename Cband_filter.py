@@ -1,5 +1,5 @@
-from scipy import signal as sig
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def cband_filter(shape, D0, ftype='ideal', reject=True, W=1, n=1):
@@ -12,7 +12,6 @@ def cband_filter(shape, D0, ftype='ideal', reject=True, W=1, n=1):
         W= band width(s)
         n:order(s) of the butterworth notches
     """
-
     H = np.zeros(shape)
     r, c = shape
     R, C = np.ogrid[:r, :c]
@@ -24,9 +23,9 @@ def cband_filter(shape, D0, ftype='ideal', reject=True, W=1, n=1):
         H = 1 / (1 + ((D * W) / (D ** 2 - D0 ** 2)) ** (2 * n))
     elif ftype == 'gaussian':
         D = np.sqrt((R - r // 2) ** 2 + (C - c // 2) ** 2)
-        print(D)
-        D[D == 0] = 1  # nulwaarde in midden op 1 foefelen
+        D[D == 0] = 1
         H = 1 - np.exp(-(((D ** 2) - (D0 ** 2)) / (D * W)) ** 2)
     if not reject:
         H = 1 - H
     return H
+

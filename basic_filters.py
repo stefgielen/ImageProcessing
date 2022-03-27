@@ -63,7 +63,6 @@ def plot_filter(H):
     y = np.arange(start=0, stop=len(H[0, :]))
     X, Y = np.meshgrid(y, x)
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-
     surf = ax.plot_surface(Y, X, H)
 
 """

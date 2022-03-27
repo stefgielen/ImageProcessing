@@ -1,5 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
+
+
 def dftfilt(f, H, pad=False):
     """
     filter the image f in the frequency domain with the filter H (G=F*H) and return the filtered image g
@@ -10,15 +11,15 @@ def dftfilt(f, H, pad=False):
     """
     r, c = f.shape
     if pad:
-        f = np.pad(f, ((r//2, r//2), (c//2, c//2)), 'constant')
+        # padding voor en na foto, in totaal r padding toegevoegd
+        f = np.pad(f, ((r // 2, r // 2), (c // 2, c // 2)), 'constant')
         F = np.fft.fftshift(np.fft.fft2(f))
         G = F * H
         g = np.real(np.fft.ifft2(np.fft.ifftshift(G)))
-        g = g[r//2:3 * (r //2), c//2:3 * (c //2)]
+        # croppen naar otiginele size
+        g = g[r // 2:3 * (r // 2), c // 2:3 * (c // 2)]
     else:
         F = np.fft.fftshift(np.fft.fft2(f))
         G = F * H
         g = np.real(np.fft.ifft2(np.fft.ifftshift(G)))
-
-#MOET NOG GECENTERD WORDEN
     return g
