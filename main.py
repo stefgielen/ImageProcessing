@@ -8,7 +8,7 @@ import imageio as iio
 import numpy as np
 from Cband_filter import cband_filter
 from skimage.morphology import square, dilation
-from periodic_noise import periodic_noise
+from PeriodicNoise import periodic_noise
 from Dftfilt import dftfilt
 from basic_filters import lpcfilter
 from Functions import plot_figures
@@ -17,7 +17,7 @@ from Functions import plot_figures
 
 "--------------------------Periodic noise-------------------------"
 img = iio.imread(
-    '/Users/stefgielen/Documents/school 2021-2022/SEM2/image processing/Oefeningen/imgs/Apollo17boulder.tif')
+    'imgs/Apollo17boulder.tif')
 img = util.img_as_float(img)
 
 M, N = img.shape

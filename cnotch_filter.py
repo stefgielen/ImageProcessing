@@ -14,7 +14,7 @@ import imageio as iio
 import numpy as np
 from Cband_filter import cband_filter
 from skimage.morphology import square, dilation
-from periodic_noise import periodic_noise
+from PeriodicNoise import periodic_noise
 
 
 def cnotch_filter(shape=None, centers=None, ftype='ideal', reject=True, D0=0, n=1):
