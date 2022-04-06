@@ -16,4 +16,12 @@ dftfilt --ok \
 restoration filters --jeff \
 linearmotionblurfilter 
 
+## Examenoefeningen
+Affine transformaties --ok \
+Projective transformations \
+Image stitching: Panoramas \
+Piecewise warp \
+Morphing \
+Pyramid Blending \
+Face swap \
 
