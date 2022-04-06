@@ -28,21 +28,20 @@ def dftfilt(f, H, pad=False):
         g = np.real(np.fft.ifft2(np.fft.ifftshift(G)))
     return g
 
-"""
-img = iio.imread('imgs/obelix.tif')
-img = util.img_as_float(img)
-    #filter zonder padding
-r, c = img.shape
-H = lpcfilter((r, c), ftype='gaussian', D0=30)
-g = dftfilt(img, H)
-    #filter met padding
-Hp = lpcfilter((2 * r, 2 * c), ftype='gaussian', D0=2 * 30)
-gp = dftfilt(img, Hp, pad=True)
+if __name__ == "__main__":
+    img = iio.imread('imgs/obelix.tif')
+    img = util.img_as_float(img)
+        #filter zonder padding
+    r, c = img.shape
+    H = lpcfilter((r, c), ftype='gaussian', D0=30)
+    g = dftfilt(img, H)
+        #filter met padding
+    Hp = lpcfilter((2 * r, 2 * c), ftype='gaussian', D0=2 * 30)
+    gp = dftfilt(img, Hp, pad=True)
 
-dftPlots = []
-dftTitles = []
-dftPlots.append(img); dftTitles.append('original')
-dftPlots.append(g); dftTitles.append('gaussian filter no padding')
-dftPlots.append(gp); dftTitles.append('gaussian filter with padding')
-plot_figures('Dft filter function', np.array(dftPlots), dftTitles, rowSize=1)
-"""
+    dftPlots = []
+    dftTitles = []
+    dftPlots.append(img); dftTitles.append('original')
+    dftPlots.append(g); dftTitles.append('gaussian filter no padding')
+    dftPlots.append(gp); dftTitles.append('gaussian filter with padding')
+    plot_figures('Dft filter function', np.array(dftPlots), dftTitles, rowSize=1)
