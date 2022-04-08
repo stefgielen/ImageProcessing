@@ -18,6 +18,19 @@ from skimage import color, io
 
 def get_matches(im_or, im_tf, n_keypoints = 500,
                 ax = None, title = 'Original vs transformed'):
+    """
+    Extract descriptors and keypoints from two images and return the matches
+    :param im_or: original image
+    :param im_tf: transformed image
+    :param n_keypoints: amount of keypoints to be found
+    :param ax: axes object for plotting the keypoints as subplot
+    :param title: title of the axes subplot
+    :return:
+        matches: Indices of corresponding matches in first and second set of
+        descriptors
+        keypoints_or:  Keypoint coordinates as ``(row, col)`` of original image
+        keypoints_tf: Keypoint coordinates as ``(row, col)`` of transformed image
+    """
     descriptor_extractor = ORB(n_keypoints = n_keypoints)   # descriptor extractor object ORB is extractor
     descriptor_extractor.detect_and_extract(color.rgb2gray(im_or))
     keypoints_or = descriptor_extractor.keypoints           # originele keypoints
@@ -36,6 +49,24 @@ def get_matches(im_or, im_tf, n_keypoints = 500,
 
 def get_tf_model(src, dst, xTransform=AffineTransform, n_keypoints=500,
                  min_samples=4, residual_threshold=2, **kwargs):
+    """
+    calls the ransac function that fits a model to data using the ransac algorithm
+    :param src:  source image
+    :param dst: destination image
+    :param xTransform: Ransac parameter,
+        model class, defines transformation type
+    :param n_keypoints: get_matches parameter,
+        int in range (0, N)
+        Defines amount of detected matches
+    :param min_samples: Ransac parameter,
+        int in range (0, N)
+        The minimum number of data points to fit a model to.
+    :param residual_threshold: Ransac parameter,
+        float larger than 0
+        Maximum distance for a data point to be classified as an inlier.
+    :param kwargs:
+    :return: returns tf_model alculated using RANSAC
+    """
     matches, kp_src, kp_dst = get_matches(src, dst, n_keypoints= n_keypoints)
     src = kp_src[matches[:, 0]][:, ::-1]
     dst = kp_dst[matches[:, 1]][:, ::-1]
@@ -45,38 +76,26 @@ def get_tf_model(src, dst, xTransform=AffineTransform, n_keypoints=500,
 
 "-------------------------Affine Transformation-----------------------------"
 if __name__ == "__main__":
-    Plots = []
-    Titles = []
     im = iio.imread('imgs/yoda.jpg')
         # Translatie
     c = np.array(im.shape[:2])//2   # center
     T = np.diag([1, 1, 1])          # diagonaalmatrix
     T[:2, -1] = -c[::-1]            # spaciale coördinaten
     imT = warp(im, np.linalg.inv(T), order=3)
-
-
         # Rotatie
     theta = np.deg2rad(30)          # radialen zetten
     R = np.array([[np.cos(theta), -np.sin(theta), 0],
                   [np.sin(theta), np.cos(theta), 0],
                  [0, 0, 1]])           # rotatiematrix R
     imR = warp(im, np.linalg.inv(R), order=3)
-
         # Translatie naar centrum
     Ti = np.diag([1, 1, 1])           # translatiematrix om naar centrum te schuiven
     Ti[:2, -1] = c[::-1]
     A = np.dot(Ti, np.dot(R, T))
     imA = warp(im, np.linalg.inv(A), order=3)
 
-    #Plots.append(imT); Titles.append("translatie")
-    #Plots.append(imR); Titles.append("rotatie")
-    #Plots.append(imA); Titles.append("translatie naar centrum")
-
-    #plot_figures('transformations', np.array(Plots), Titles, rowSize=3)
-
     fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(6, 3))
     matches, kp_or, kp_tf = get_matches(im, imA, n_keypoints=200, ax=ax1)
-
     plt.show()
 
     tf_model = get_tf_model(im, imA, xTransform=AffineTransform, n_keypoints=200,
