@@ -18,8 +18,8 @@ linearmotionblurfilter
 
 ## Examenoefeningen
 Affine transformaties --ok \
-Projective transformations \
-Image stitching: Panoramas \
+Projective transformations --ok\
+Image stitching: Panoramas --ok\
 Piecewise warp \
 Morphing \
 Pyramid Blending \
