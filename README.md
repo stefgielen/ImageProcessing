@@ -20,8 +20,8 @@ linearmotionblurfilter
 Affine transformaties --ok \
 Projective transformations --ok\
 Image stitching: Panoramas --ok\
-Piecewise warp \
-Morphing \
-Pyramid Blending \
-Face swap \
+Piecewise warp --Sofie\
+Morphing --Jeff\
+Pyramid Blending --Nathan stef  \
+Face swap -- Jeff Sofie \
 
