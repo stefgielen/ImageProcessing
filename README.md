@@ -18,10 +18,10 @@ linearmotionblurfilter
 
 ## Examenoefeningen
 Affine transformaties --ok \
-Projective transformations \
-Image stitching: Panoramas \
-Piecewise warp \
-Morphing \
-Pyramid Blending \
-Face swap \
+Projective transformations --ok\
+Image stitching: Panoramas --ok\
+Piecewise warp --Sofie\
+Morphing --Jeff\
+Pyramid Blending --Nathan stef  \
+Face swap -- Jeff Sofie \
 
