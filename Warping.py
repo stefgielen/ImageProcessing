@@ -126,27 +126,28 @@ def warp_image(im1, pts, tris, ptsm, im2_shape):
     return warped
 
 # main
-p = ".\shape_predictor_68_face_landmarks.dat"
-detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor(p)
+if __name__ == "__main__":
+    p = ".\shape_predictor_68_face_landmarks.dat"
+    detector = dlib.get_frontal_face_detector()
+    predictor = dlib.shape_predictor(p)
 
-image1 = io.imread('./imgs/faces/daenerys.jpg')
-image2 = io.imread('./imgs/faces/gal_gadot.jpg')
-#image1=resize(image1,image2.shape[:2])
-image2=resize(image2,image1.shape[:2])
+    image1 = io.imread('./imgs/faces/daenerys.jpg')
+    image2 = io.imread('./imgs/faces/gal_gadot.jpg')
+    #image1=resize(image1,image2.shape[:2])
+    image2=resize(image2,image1.shape[:2])
 
-pts1 = get_points(image1)
-pts2 = get_points(image2)
+    pts1 = get_points(image1)
+    pts2 = get_points(image2)
 
-tris1 = get_triangular_mesh_t(image1, pts1)
-tris2 = get_triangular_mesh_t(image2, pts2)
+    tris1 = get_triangular_mesh_t(image1, pts1)
+    tris2 = get_triangular_mesh_t(image2, pts2)
 
 
-alpha = 0.5
-ptsm = (1 - alpha) * pts1 + alpha * pts2
+    alpha = 0.5
+    ptsm = (1 - alpha) * pts1 + alpha * pts2
 
-warped1 = warp_image(image1,pts1,tris1,ptsm,image2.shape)
-warped2 = warp_image(image2,pts2,tris2,ptsm,image1.shape)
-morphed = img_as_ubyte((1-alpha) * warped1 + alpha * warped2)
-plt.imshow(morphed)
-plt.show()
+    warped1 = warp_image(image1,pts1,tris1,ptsm,image2.shape)
+    warped2 = warp_image(image2,pts2,tris2,ptsm,image1.shape)
+    morphed = img_as_ubyte((1-alpha) * warped1 + alpha * warped2)
+    plt.imshow(morphed)
+    plt.show()
