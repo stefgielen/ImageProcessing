@@ -22,6 +22,6 @@ Projective transformations --ok\
 Image stitching: Panoramas --ok\
 Piecewise warp --Sofie\
 Morphing --Jeff\
-Pyramid Blending --Nathan stef  \
+Pyramid Blending --ok  \
 Face swap -- Jeff Sofie \
 
