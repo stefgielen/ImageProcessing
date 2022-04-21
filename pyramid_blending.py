@@ -15,7 +15,7 @@ def get_gaussian_pyramid(image,downscale=2, **kwargs):
     images = []
     images.append(image)
     while images[-1].shape[0]%2==0 &  images[-1].shape[1]%2==0:
-        images.append(skimage.transform.pyramid_reduce(images[-1], downscale=2, channel_axis=2, preserve_range=True))
+        images.append(skimage.transform.pyramid_reduce(images[-1], downscale=downscale, channel_axis=2, preserve_range=True))
     return images
 
 

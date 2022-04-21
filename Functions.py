@@ -20,8 +20,8 @@ def plot_figures(mainTitle, plots, titles, rowSize = 4):
     for i in range(0, tot):
         ax = fig.add_subplot(rows, cols, position[i])
         ax.set_title(titles[i])
-        ax.xaxis.set_ticklabels([]);
-        ax.yaxis.set_ticklabels([])
+        #ax.xaxis.set_ticklabels([]);
+        #ax.yaxis.set_ticklabels([])
         ax.imshow(plots[i], cmap='gray')
     fig.suptitle(mainTitle)
     plt.show()

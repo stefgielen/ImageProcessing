@@ -11,13 +11,14 @@ from skimage.draw import polygon, rectangle_perimeter
 
 def add_corners(pts, image):
     h, w, z = image.shape
-    points = np.array([[0, 0], [w, 0], [0, h], [w, h], [w / 2, 0], [0, h / 2], [w, h / 2], [w / 2, h]])
+    #points = np.array([[0, 0], [w, 0], [0, h], [w, h], [w / 2, 0], [0, h / 2], [w, h / 2], [w / 2, h]])
+    points = np.array([[1, 1], [w-1, 1], [1, h-1], [w-1, h-1], [w / 2, 1], [1, h / 2], [w-1, h / 2], [w / 2, h-1]])
     pts = np.vstack((points, pts))
     return pts
 
 
 def get_points(image):
-    p = ".\shape_predictor_68_face_landmarks.dat"
+    p = "./shape_predictor_68_face_landmarks.dat"
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor(p)
 
@@ -33,25 +34,17 @@ def get_points(image):
 
 def get_triangular_mesh_t(image, pts):
     tris = Delaunay(pts)
-    """""
-    fig, (ax) = plt.subplots(nrows=1, ncols=1)
+
+    """fig, (ax) = plt.subplots(nrows=1, ncols=1)
     ax.imshow(image)
     ax.triplot(pts[:, 0], pts[:, 1], tris.simplices)
     plt.title("triangular mesh")
-    plt.show()
-    """
+    plt.show()"""
+
     return tris
 
 
-def get_max_shape(image1, image2):
-    w1, h1, z1 = image1.shape
-    w2, h2, z2 = image2.shape
-    w = max(w1, w2)
-    h = max(h1, h2)
-    return w, h, z1
-
-
-def get_max_shape2(image1, image2_shape):
+def get_max_shape(image1, image2_shape):
     w1, h1, z1 = image1.shape
     w2, h2, z2 = image2_shape
     w = max(w1, w2)
@@ -83,7 +76,7 @@ def get_triangle_mask(tm, bbm, output_shape):
 
 
 def warp_image(im1, pts, tris, ptsm, im2_shape):
-    max_shape_of_im1_and_im2 = get_max_shape2(im1, im2_shape)
+    max_shape_of_im1_and_im2 = get_max_shape(im1, im2_shape)
     warped = np.zeros(max_shape_of_im1_and_im2)
 
     for tri in tris.simplices:
@@ -117,11 +110,11 @@ def warp_image(im1, pts, tris, ptsm, im2_shape):
             output_shape = warped[int(bbm[1]):int(bbm[1] + bbm[3]), int(bbm[0]):int(bbm[0] + bbm[2])].shape[:2]
 
             wt1 = warp_triangle(im1, bb1, M, output_shape)
-            """
-            plt.imshow(wt1)
+
+            """plt.imshow(wt1)
             plt.title("warp_triangle")
-            plt.show()
-            """
+            plt.show()"""
+
             mask = get_triangle_mask(tm, bbm, output_shape)
             warped[int(bbm[1]):int(bbm[1] + bbm[3]), int(bbm[0]):int(bbm[0] + bbm[2])] = warped[
                                                                                          int(bbm[1]):int(
@@ -143,12 +136,20 @@ if __name__ == "__main__":
     pts1 = pts1[0]
     pts1 = add_corners(pts1, image1)
 
+    plt.imshow(image1)
+    plt.plot(pts1[:, 0], pts1[:, 1], 'o')
+    plt.show()
+
     pts2 = get_points(image2)
     pts2 = pts2[0]
     pts2 = add_corners(pts2, image2)
 
     tris1 = get_triangular_mesh_t(image1, pts1)
     tris2 = get_triangular_mesh_t(image2, pts2)
+
+    plt.imshow(image1)
+    plt.triplot(pts1[:, 0], pts1[:, 1], tris1.simplices)
+    plt.show()
 
     alpha = 0.5
     ptsm = (1 - alpha) * pts1 + alpha * pts2
