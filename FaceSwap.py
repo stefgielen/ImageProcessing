@@ -4,7 +4,7 @@ from scipy.spatial import ConvexHull, Delaunay
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage.draw import polygon
-from pyramid_blending import get_laplacian_pyramid, reconstruct_image_from_laplacian_pyramid
+from pyramid_blending import get_laplacian_pyramid, reconstruct_image_from_laplacian_pyramid, get_gaussian_pyramid
 from Functions import plot_figures
 
 def get_mask(hull ,output_shape):
@@ -177,18 +177,18 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1)):
 
     # Step 6: Pad or crop to same size as image 1
     if img2 is not None:
-        if warped2.shape[0]< img1.shape[0]:
+        if warped1.shape[0]< img1.shape[0]:
             mask1 = np.pad(mask1, ((mask1.shape[0], img1.shape[0]), 'constant'))
-            warped2 = np.pad(warped2, ((warped2.shape[0], img1.shape[0]), 'constant'))
+            warped1 = np.pad(warped1, ((warped1.shape[0], img1.shape[0]), 'constant'))
         else:
             mask1 = mask1[:img1.shape[0], :]
-            warped2 = warped2[:img1.shape[0], :]
+            warped1 = warped2[:img1.shape[0], :]
         if warped2.shape[1] < img1.shape[1]:
             mask1 = np.pad(mask1, ((mask1.shape[1], img1.shape[1]), 'constant'))
-            warped2 = np.pad(warped2, ((warped2.shape[1], img1.shape[1]), 'constant'))
+            warped1 = np.pad(warped1, ((warped1.shape[1], img1.shape[1]), 'constant'))
         else:
             mask1 = mask1[:, :img1.shape[1]]
-            warped2 = warped2[:, :img1.shape[1]]
+            warped1 = warped1[:, :img1.shape[1]]
 
     plots.append(img1)
     plots.append(mask1)
@@ -208,17 +208,15 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1)):
 
     # Step 7: Blend images using mask
     if blendmode == 'alfa-blending':
-        alpha = 0.5
-
-        swapped = img_as_ubyte((1 - alpha) * warped1 * mask1 + alpha * img1/255)
+        swapped = (warped1 * mask1) + img1/255
 
     if blendmode == 'pyramid':
         im1Lapl = get_laplacian_pyramid(img1)
         warpLapl = get_laplacian_pyramid(warped1)
-        maskGaus = get_laplacian_pyramid(mask1)
+        maskGaus = get_gaussian_pyramid(mask1)
         blendLapl = np.zeros_like(im1Lapl)
         for i in range(0, len(im1Lapl)):
-            blendLapl[i] = im1Lapl[i] * (1-maskGaus[i]) + warpLapl[i] * (maskGaus[i])
+            blendLapl[i] = (im1Lapl[i] * (1-maskGaus[i])) + (warpLapl[i] * maskGaus[i])
 
         #blendLapl = im1Lapl * (1-maskGaus) + warpLapl * (maskGaus)
         swapped = reconstruct_image_from_laplacian_pyramid(blendLapl)
@@ -230,4 +228,4 @@ if __name__ == "__main__":
     image1 = io.imread('./imgs/faces/superman.jpg')
     image2 = io.imread('./imgs/faces/nicolas_cage.jpg')
     image3 = io.imread('./imgs/faces/brangelina.jpg')
-    swap_faces(image1, image2, blendmode="alfa-blending")
+    swap_faces(image1, image2, blendmode="pyramid")
