@@ -1,5 +1,5 @@
 from skimage import img_as_ubyte, io, color
-from Warping import get_points, get_triangular_mesh_t, warp_image, add_corners, get_triangle_mask
+from Piecewise_warp import get_points, get_triangular_mesh_t, warp_image, add_corners, get_triangle_mask
 from scipy.spatial import ConvexHull, Delaunay
 import matplotlib.pyplot as plt
 import numpy as np
@@ -34,6 +34,8 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1)):
     """
     plots = []
     titles = []
+    plots2=[]
+    titles2=[]
 
     # Step1: Get feature points
     if img2 is None:
@@ -143,44 +145,66 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1)):
         plt.show()"""
 
     # Step 4: warp image
-    alpha = 0.5
-    ptsm = (1 - alpha) * pts1 + alpha * pts2
+    alpha = 0
+    ptsm_alpha0  = (1 - alpha) * pts1 + alpha * pts2
+    alpha=1
+    ptsm_alpha1 =(1 - alpha) * pts1 + alpha * pts2
     if img2 is None:
-        warped1 = warp_image(img1, pts1, tris1, ptsm, img1.shape)
-        warped2 = warp_image(img1, pts2, tris2, ptsm, img1.shape)
+        warped1 = warp_image(img1, pts1, tris1, ptsm_alpha1, img1.shape)
+        warped2 = warp_image(img1, pts2, tris2, ptsm_alpha0, img1.shape)
     else:
-        warped1 = warp_image(img2, pts2, tris2, ptsm, img1.shape)
+        warped1 = warp_image(img1, pts1, tris1, ptsm_alpha1, img2.shape)
+        warped2 = warp_image(img2, pts2, tris2, ptsm_alpha0, img1.shape)
 
     # Step 5: Create masks
-    if img2 is None:
-        mask1 = get_mask(hull1, warped1.shape[:2])
-        mask2 = get_mask(hull2, warped1.shape[:2])
+    mask1 = get_mask(hull1, warped2.shape[:2])
+    mask2 = get_mask(hull2, warped1.shape[:2])
 
-    else:
-        mask1 = get_mask(hull1, warped1.shape[:2])
+    plots.append(img1)
+    plots.append(mask1)
+    plots.append(warped2)
+    titles.append("")
+    titles.append("")
+    titles.append("")
+
+    plots2.append(img2)
+    plots2.append(mask2)
+    plots2.append(warped1)
+    titles2.append("")
+    titles2.append("")
+    titles2.append("")
+
 
     # Step 6: Pad or crop to same size as image 1
     if img2 is not None:
-        if warped1.shape[0]< img1.shape[0]:
+        if warped2.shape[0]< img1.shape[0]:
             mask1 = np.pad(mask1, ((mask1.shape[0], img1.shape[0]), 'constant'))
-            warped1 = np.pad(warped1, ((warped1.shape[0], img1.shape[0]), 'constant'))
+            warped2 = np.pad(warped2, ((warped2.shape[0], img1.shape[0]), 'constant'))
         else:
             mask1 = mask1[:img1.shape[0], :]
-            warped1 = warped1[:img1.shape[0], :]
-        if warped1.shape[1] < img1.shape[1]:
+            warped2 = warped2[:img1.shape[0], :]
+        if warped2.shape[1] < img1.shape[1]:
             mask1 = np.pad(mask1, ((mask1.shape[1], img1.shape[1]), 'constant'))
-            warped1 = np.pad(warped1, ((warped1.shape[1], img1.shape[1]), 'constant'))
+            warped2 = np.pad(warped2, ((warped2.shape[1], img1.shape[1]), 'constant'))
         else:
             mask1 = mask1[:, :img1.shape[1]]
-            warped1 = warped1[:, :img1.shape[1]]
+            warped2 = warped2[:, :img1.shape[1]]
 
-    """plots.append(img1)
+    plots.append(img1)
     plots.append(mask1)
-    plots.append(warped1)
+    plots.append(warped2)
     titles.append("")
     titles.append("")
     titles.append("")
-    plot_figures('face swap', np.array(plots), titles, rowSize=3)"""
+    plot_figures('face swap', np.array(plots), titles, rowSize=3)
+
+    plots2.append(img2)
+    plots2.append(mask2)
+    plots2.append(warped1)
+    titles2.append("")
+    titles2.append("")
+    titles2.append("")
+    plot_figures('face swap', np.array(plots2), titles2, rowSize=3)
 
     # Step 7: Blend images using mask
     if blendmode == 'alfa-blending':
