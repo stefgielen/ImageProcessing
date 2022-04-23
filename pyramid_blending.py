@@ -14,7 +14,7 @@ def get_gaussian_pyramid(image,downscale=2, **kwargs):
     """
     images = []
     images.append(image)
-    while images[-1].shape[0]%2==0 &  images[-1].shape[1]%2==0:
+    while images[-1].shape[0]%2==0 and images[-1].shape[1]%2==0:
         images.append(skimage.transform.pyramid_reduce(images[-1], downscale=downscale, channel_axis=2, preserve_range=True))
     return images
 
@@ -31,7 +31,9 @@ def get_laplacian_pyramid(img_pyr, upscale=2, **kwargs):
     if not isinstance(img_pyr, list):           #als input image is en geen pyramid -> pyramid aanmaken (zie functiebeschrijving)
         img_pyr = get_gaussian_pyramid(img_pyr)
     for i in range(1, len(img_pyr)):
-        images.append(img_pyr[i-1]-(skimage.transform.pyramid_expand(img_pyr[i]/255, upscale, channel_axis=2, preserve_range=True)*255))
+        #if(img_pyr[i-1].shape != skimage.transform.pyramid_expand(img_pyr[i], upscale, channel_axis=2).shape):
+            #break
+        images.append(img_pyr[i-1]-(skimage.transform.pyramid_expand(img_pyr[i], upscale, channel_axis=2)))
     #first laplacian is the same as the highest level gaussian
     images.append(img_pyr[-1])
     return images
@@ -46,7 +48,7 @@ def plot_pyramid(pyramid):
     pyramid_image[:len(pyramid[0]), :len(pyramid[0][0])] = pyramid[0]
     xborder = 0
     for pic in pyramid[1:]:
-        pyramid_image[xborder:xborder+len(pic), len(pyramid[0][0]):len(pyramid[0][0])+len(pic[0])] = pic
+        pyramid_image[xborder:xborder+len(pic), len(pyramid[0][0]):len(pyramid[0][0])+len(pic[0])] = pic/255
         xborder += len(pic)
     plt.imshow(pyramid_image)
     plt.show()
@@ -59,14 +61,15 @@ def reconstruct_image_from_laplacian_pyramid(pyramid):
     """
     reconstructed_image = pyramid[-1]
     for i in range(2, len(pyramid)+1):
-        reconstructed_image = (pyramid[-i] + skimage.transform.pyramid_expand(reconstructed_image / 255, 2, channel_axis=2, preserve_range=True) * 255)
-    plt.imshow(reconstructed_image/255)
-    plt.show()
+        reconstructed_image = (pyramid[-i] + skimage.transform.pyramid_expand(reconstructed_image, 2, channel_axis=2))
+    #plt.imshow(reconstructed_image/255)
+    #plt.show()
+    return reconstructed_image / 255
 
 if __name__ == "__main__":
-    image =io.imread('./imgs/faces/superman.jpg')
+    image = io.imread('./imgs/faces/superman.jpg')
     gpyramid = get_gaussian_pyramid(image)
     lpyramid = get_laplacian_pyramid(gpyramid)
-    plot_pyramid(gpyramid)
-    plot_pyramid(lpyramid)
-    reconstruct_image_from_laplacian_pyramid(lpyramid)
+    swapped = reconstruct_image_from_laplacian_pyramid(lpyramid)
+    plt.imshow(swapped)
+    plt.show()

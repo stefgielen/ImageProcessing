@@ -4,7 +4,7 @@ from scipy.spatial import ConvexHull, Delaunay
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage.draw import polygon
-from pyramid_blending import get_laplacian_pyramid, reconstruct_image_from_laplacian_pyramid, get_gaussian_pyramid
+from pyramid_blending import get_laplacian_pyramid, reconstruct_image_from_laplacian_pyramid, get_gaussian_pyramid, plot_pyramid
 from Functions import plot_figures
 
 def get_mask(hull ,output_shape):
@@ -47,64 +47,64 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1)):
         pts1 = get_points(img1)[0]
         pts2 = get_points(img2)[0]
 
-    """if img2 is None:
-        plt.imshow(img1)
-        plt.plot(pts1[:, 0], pts1[:, 1], 'o')
-        plt.plot(pts2[:, 0], pts2[:, 1], 'o')
-        plt.title("feature points")
-        plt.show()
-    else:
-        plt.imshow(img1)
-        plt.plot(pts1[:, 0], pts1[:, 1], 'o')
-        # plt.plot(pts2[:, 0], pts2[:, 1], 'o')
-        plt.title("feature points")
-        plt.show()
-        plt.imshow(img2)
-        plt.plot(pts2[:, 0], pts2[:, 1], 'o')
-        # plt.plot(pts2[:, 0], pts2[:, 1], 'o')
-        plt.title("feature points")
-        plt.show()"""
+    # if img2 is None:
+    #     plt.imshow(img1)
+    #     plt.plot(pts1[:, 0], pts1[:, 1], 'o')
+    #     plt.plot(pts2[:, 0], pts2[:, 1], 'o')
+    #     plt.title("feature points")
+    #     plt.show()
+    # else:
+    #     plt.imshow(img1)
+    #     plt.plot(pts1[:, 0], pts1[:, 1], 'o')
+    #     # plt.plot(pts2[:, 0], pts2[:, 1], 'o')
+    #     plt.title("feature points")
+    #     plt.show()
+    #     plt.imshow(img2)
+    #     plt.plot(pts2[:, 0], pts2[:, 1], 'o')
+    #     # plt.plot(pts2[:, 0], pts2[:, 1], 'o')
+    #     plt.title("feature points")
+    #     plt.show()
 
     # select convexhull
     hull1 = ConvexHull(pts1)
     hull2 = ConvexHull(pts2)
 
 
-    """if img2 is None:
-        plt.imshow(img1)
-        plt.plot(pts1[:, 0], pts1[:, 1], 'o')
-        plt.plot(pts2[:, 0], pts2[:, 1], 'o')
-
-        for simplex in hull1.simplices:
-            plt.plot(pts1[simplex, 0], pts1[simplex, 1], 'k-')
-            plt.plot(pts2[simplex, 0], pts2[simplex, 1], 'k-')
-        plt.title("convex hull")
-        plt.show()
-    else:
-        plt.imshow(img1)
-        plt.plot(pts1[:, 0], pts1[:, 1], 'o')
-        for simplex in hull1.simplices:
-            plt.plot(pts1[simplex, 0], pts1[simplex, 1], 'k-')
-        plt.title("convex hull")
-        plt.show()
-
-        plt.imshow(img2)
-        plt.plot(pts2[:, 0], pts2[:, 1], 'o')
-        for simplex in hull1.simplices:
-            plt.plot(pts2[simplex, 0], pts2[simplex, 1], 'k-')
-        plt.title("convex hull")
-        plt.show()"""
+    # if img2 is None:
+    #     plt.imshow(img1)
+    #     plt.plot(pts1[:, 0], pts1[:, 1], 'o')
+    #     plt.plot(pts2[:, 0], pts2[:, 1], 'o')
+    #
+    #     for simplex in hull1.simplices:
+    #         plt.plot(pts1[simplex, 0], pts1[simplex, 1], 'k-')
+    #         plt.plot(pts2[simplex, 0], pts2[simplex, 1], 'k-')
+    #     plt.title("convex hull")
+    #     plt.show()
+    # else:
+    #     plt.imshow(img1)
+    #     plt.plot(pts1[:, 0], pts1[:, 1], 'o')
+    #     for simplex in hull1.simplices:
+    #         plt.plot(pts1[simplex, 0], pts1[simplex, 1], 'k-')
+    #     plt.title("convex hull")
+    #     plt.show()
+    #
+    #     plt.imshow(img2)
+    #     plt.plot(pts2[:, 0], pts2[:, 1], 'o')
+    #     for simplex in hull1.simplices:
+    #         plt.plot(pts2[simplex, 0], pts2[simplex, 1], 'k-')
+    #     plt.title("convex hull")
+    #     plt.show()
 
     # step 2: add corners
     if img2 is None:
         pts1 = add_corners(pts1, img1)
         pts2 = add_corners(pts2, img1)
 
-        """plt.imshow(img1)
-        plt.plot(pts1[:, 0], pts1[:, 1], 'o')
-        plt.plot(pts2[:, 0], pts2[:, 1], 'o')
-        plt.title("corner points")
-        plt.show()"""
+        # plt.imshow(img1)
+        # plt.plot(pts1[:, 0], pts1[:, 1], 'o')
+        # plt.plot(pts2[:, 0], pts2[:, 1], 'o')
+        # plt.title("corner points")
+        # plt.show()
     else:
         pts1 = add_corners(pts1, img1)
         pts2 = add_corners(pts2, img2)
@@ -128,21 +128,21 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1)):
         tris1 = get_triangular_mesh_t(img1, pts1)
         tris2 = get_triangular_mesh_t(img2, pts2)
 
-    """if img2 is None:
-        plt.imshow(img1)
-        plt.triplot(pts1[:, 0], pts1[:, 1], tris1.simplices)
-        plt.triplot(pts2[:, 0], pts2[:, 1], tris2.simplices)
-        plt.title("triangular mesh ")
-        plt.show()
-    else:
-        plt.imshow(img1)
-        plt.triplot(pts1[:, 0], pts1[:, 1], tris1.simplices)
-        plt.title("triangular mesh ")
-        plt.show()
-        plt.imshow(img2)
-        plt.triplot(pts2[:, 0], pts2[:, 1], tris2.simplices)
-        plt.title("triangular mesh ")
-        plt.show()"""
+    # if img2 is None:
+    #     plt.imshow(img1)
+    #     plt.triplot(pts1[:, 0], pts1[:, 1], tris1.simplices)
+    #     plt.triplot(pts2[:, 0], pts2[:, 1], tris2.simplices)
+    #     plt.title("triangular mesh ")
+    #     plt.show()
+    # else:
+    #     plt.imshow(img1)
+    #     plt.triplot(pts1[:, 0], pts1[:, 1], tris1.simplices)
+    #     plt.title("triangular mesh ")
+    #     plt.show()
+    #     plt.imshow(img2)
+    #     plt.triplot(pts2[:, 0], pts2[:, 1], tris2.simplices)
+    #     plt.title("triangular mesh ")
+    #     plt.show()
 
     # Step 4: warp image
     alpha = 0
@@ -150,29 +150,29 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1)):
     alpha=1
     ptsm_alpha1 =(1 - alpha) * pts1 + alpha * pts2
     if img2 is None:
-        warped1 = warp_image(img1, pts1, tris1, ptsm_alpha1, img1.shape)
-        warped2 = warp_image(img1, pts2, tris2, ptsm_alpha0, img1.shape)
+        warped1 = warp_image(img1, pts1, tris1, ptsm_alpha1, img1.shape)*255
+        warped2 = warp_image(img1, pts2, tris2, ptsm_alpha0, img1.shape)*255
     else:
-        warped1 = warp_image(img1, pts1, tris1, ptsm_alpha1, img2.shape)
-        warped2 = warp_image(img2, pts2, tris2, ptsm_alpha0, img1.shape)
+        warped1 = warp_image(img1, pts1, tris1, ptsm_alpha1, img2.shape)*255
+        warped2 = warp_image(img2, pts2, tris2, ptsm_alpha0, img1.shape)*255
 
     # Step 5: Create masks
     mask1 = get_mask(hull1, warped2.shape[:2])
     mask2 = get_mask(hull2, warped1.shape[:2])
 
-    plots.append(img1)
-    plots.append(mask1)
-    plots.append(warped2)
-    titles.append("")
-    titles.append("")
-    titles.append("")
-
-    plots2.append(img2)
-    plots2.append(mask2)
-    plots2.append(warped1)
-    titles2.append("")
-    titles2.append("")
-    titles2.append("")
+    # plots.append(img1)
+    # plots.append(mask1)
+    # plots.append(warped2)
+    # titles.append("")
+    # titles.append("")
+    # titles.append("")
+    #
+    # plots2.append(img2)
+    # plots2.append(mask2)
+    # plots2.append(warped1)
+    # titles2.append("")
+    # titles2.append("")
+    # titles2.append("")
 
 
     # Step 6: Pad or crop to same size as image 1
@@ -190,42 +190,82 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1)):
             mask1 = mask1[:, :img1.shape[1]]
             warped1 = warped1[:, :img1.shape[1]]
 
-    plots.append(img1)
-    plots.append(mask1)
-    plots.append(warped2)
-    titles.append("")
-    titles.append("")
-    titles.append("")
-    plot_figures('face swap', np.array(plots), titles, rowSize=3)
+    # plots.append(img1)
+    # plots.append(mask1)
+    # plots.append(warped2)
+    # titles.append("")
+    # titles.append("")
+    # titles.append("")
+    # plot_figures('face swap', np.array(plots), titles, rowSize=3)
+    #
+    # plots2.append(img2)
+    # plots2.append(mask2)
+    # plots2.append(warped1)
+    # titles2.append("")
+    # titles2.append("")
+    # titles2.append("")
+    # plot_figures('face swap', np.array(plots2), titles2, rowSize=3)
 
-    plots2.append(img2)
-    plots2.append(mask2)
-    plots2.append(warped1)
-    titles2.append("")
-    titles2.append("")
-    titles2.append("")
-    plot_figures('face swap', np.array(plots2), titles2, rowSize=3)
+    # plots.append(img1/255)
+    # plots.append(mask2)
+    # plots.append(warped1)
+    # titles.append("")
+    # titles.append("")
+    # titles.append("")
+    # plot_figures('face swap', np.array(plots), titles, rowSize=3)
 
     # Step 7: Blend images using mask
-    if blendmode == 'alfa-blending':
-        swapped = (warped1 * mask1) + img1/255
+    if (img2 is None):
+        if blendmode == 'alfa-blending':
+            swapped = ((warped1 * mask2) + (warped2*mask1) + img1 * (1 - mask1)*(1-mask2))/255
+            plt.imshow(swapped)
+            plt.show()
+        elif blendmode == 'pyramid':
+            im1Lapl = get_laplacian_pyramid(img1)
+            warpLapl = get_laplacian_pyramid(warped1)
+            maskGaus = get_gaussian_pyramid(mask2)
+            blendLapl = []#np.zeros_like(im1Lapl)
+            for i in range(0,len(im1Lapl)):
+                blendLapl.append((im1Lapl[i] * (1-maskGaus[i])) + (warpLapl[i] * maskGaus[i]))
 
-    if blendmode == 'pyramid':
-        im1Lapl = get_laplacian_pyramid(img1)
-        warpLapl = get_laplacian_pyramid(warped1)
-        maskGaus = get_gaussian_pyramid(mask1)
-        blendLapl = np.zeros_like(im1Lapl)
-        for i in range(0, len(im1Lapl)):
-            blendLapl[i] = (im1Lapl[i] * (1-maskGaus[i])) + (warpLapl[i] * maskGaus[i])
+            swapped = reconstruct_image_from_laplacian_pyramid(blendLapl)
 
-        #blendLapl = im1Lapl * (1-maskGaus) + warpLapl * (maskGaus)
-        swapped = reconstruct_image_from_laplacian_pyramid(blendLapl)
+            im1Lapl = get_laplacian_pyramid(swapped)
+            warpLapl = get_laplacian_pyramid(warped2/255)
+            maskGaus = get_gaussian_pyramid(mask1)
+            blendLapl = []  # np.zeros_like(im1Lapl)
+            for i in range(0, len(im1Lapl)):
+                blendLapl.append((im1Lapl[i] * (1 - maskGaus[i])) + (warpLapl[i] * maskGaus[i]))
 
-    plt.imshow(swapped)
-    plt.show()
+            swapped = reconstruct_image_from_laplacian_pyramid(blendLapl)*255
+
+            plt.imshow(swapped)
+            plt.show()
+    else:
+        if blendmode == 'alfa-blending':
+            swapped = (warped1 * mask1) + img1*(1-mask1)
+            plt.imshow(swapped/255)
+            plt.show()
+
+        if blendmode == 'pyramid':
+            im1Lapl = get_laplacian_pyramid(img1)
+            warpLapl = get_laplacian_pyramid(warped1)
+            maskGaus = get_gaussian_pyramid(mask1)
+            blendLapl = []#np.zeros_like(im1Lapl)
+            for i in range(0,len(im1Lapl)):
+                blendLapl.append((im1Lapl[i] * (1-maskGaus[i])) + (warpLapl[i] * maskGaus[i]))
+
+            swapped = reconstruct_image_from_laplacian_pyramid(blendLapl)
+
+            plt.imshow(swapped)
+            plt.show()
+
 # main
 if __name__ == "__main__":
     image1 = io.imread('./imgs/faces/superman.jpg')
     image2 = io.imread('./imgs/faces/nicolas_cage.jpg')
     image3 = io.imread('./imgs/faces/brangelina.jpg')
+    swap_faces(image1, image2, blendmode="alfa-blending")
     swap_faces(image1, image2, blendmode="pyramid")
+    swap_faces(image3, None, blendmode='alfa-blending')
+    swap_faces(image3,None,blendmode='pyramid')
