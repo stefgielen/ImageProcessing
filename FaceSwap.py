@@ -10,7 +10,32 @@ from Functions import plot_figures
 import cv2
 
 
+def get_center(hull):
+    """
+    get the center of a convex hull
+    :param hull: convex hull
+    :return: center of the convex hull
+    """
+    rowpoints = []
+    colpoints = []
+    for vertex in hull.vertices:
+        rowpoints.append(hull.points[vertex][0])
+        colpoints.append(hull.points[vertex][1])
+    maxrow = np.amax(rowpoints)
+    minrow = np.amin(rowpoints)
+    maxcol = np.amax(colpoints)
+    mincol = np.amin(colpoints)
+    center = (int(minrow + (maxrow - minrow) // 2), int(mincol + (maxcol - mincol) // 2))
+    return center
+
+
 def get_mask(hull, output_shape):
+    """
+    construct a mask from a comvex hull
+    :param hull: convec hull
+    :param output_shape: shape of the created mask
+    :return: mask
+    """
     mask = np.zeros([output_shape[0], output_shape[1], 3])
     rowpoints = []
     colpoints = []
@@ -262,16 +287,16 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1), display=T
             swapped = reconstruct_image_from_laplacian_pyramid(blendLapl).astype(int)
             plt.imshow(swapped)
             plt.show()
-        """elif blendmode=='cv2.seamlessClone':
-           # print(img1.shape[1]//2)
-            center1 = (img1[:,:,0].shape[1]//2,img1[:,:,0].shape[0]//2)
-            center2 
-            swapped1 = cv2.seamlessClone(warped1,img1,mask2,center2,cv2.NORMAL_CLONE)
-            swapped2 = cv2.seamlessClone(warped2,img1,mask1,center1,cv2.NORMAL_CLONE)
-            plt.imshow(swapped1)
+        elif blendmode == 'cv2.seamlessClone':
+            center1 = get_center(hull1)
+            center2 = get_center(hull2)
+
+            swapped = cv2.seamlessClone(warped1.astype('uint8'), img1.astype('uint8') ,mask2.astype('uint8')*255,center2,cv2.NORMAL_CLONE)
+            swapped = cv2.seamlessClone(warped2.astype('uint8'), swapped.astype('uint8'), mask1.astype('uint8')*255, center1, cv2.NORMAL_CLONE)
+
+            plt.imshow(swapped)
             plt.show()
-            plt.imshow(swapped2)
-            plt.show()"""
+
 
     else:
         if blendmode == 'alfa-blending':
@@ -289,12 +314,18 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1), display=T
             plt.show()
             plt.imshow(swapped2)
             plt.show()
-        if blendmode == 'cv2.seamlessClone':
-            center = (img2[:, :, 0].shape[1] // 2, img2[:, :, 0].shape[0] // 2)
-            swapped = cv2.seamlessClone(warped1, img2, mask2, center, cv2.NORMAL_CLONE)
-            plt.imshow("Face swap seamlessClone", swapped)
+        elif blendmode == 'cv2.seamlessClone':
+            center1 = get_center(hull2)
+            swapped1 = cv2.seamlessClone(warped1.astype('uint8'), img2.astype('uint8'), mask2.astype('uint8') * 255,
+                                         center1, cv2.NORMAL_CLONE)
+            plt.imshow(swapped1)
             plt.show()
 
+            center2 = get_center(hull1)
+            swapped2 = cv2.seamlessClone(warped2.astype('uint8'), img1.astype('uint8'), mask1.astype('uint8') * 255,
+                                        center2, cv2.NORMAL_CLONE)
+            plt.imshow(swapped2)
+            plt.show()
 
 # main
 if __name__ == "__main__":
@@ -304,12 +335,11 @@ if __name__ == "__main__":
     # image3 = io.imread('/Users/jeffm/Pictures/vroeger/jeff_maris.jpg')
     image4 = io.imread('./imgs/faces/queen.jpg')
     image5 = io.imread('./imgs/faces/ted_cruz.jpg')
-    # image4 = io.imread('/Users/stefgielen/Downloads/878873_1_seoimage4x3_bn-859569_e58c83605ff84e42832fce5b82595756.jpg')
-    # image5 = io.imread('/Users/stefgielen/Downloads/https---static.nieuwsblad.be-Assets-Images_Upload-2020-08-11-dc59c00e-dbf1-11ea-8ffb-9e26f69cae24.jpg')
 
-    #  swap_faces(image4, image5, blendmode='cv2.seamlessClone', flip_faces=(False,True))
+    swap_faces(image4, image5, blendmode='cv2.seamlessClone', display=False)
 
     #swap_faces(image1, image2, blendmode='cv2.seamlessClone')
     #swap_faces(image3, None, blendmode='alfa-blending')
 
-#  swap_faces(image3, None, blendmode='cv2.seamlessClone')
+    swap_faces(image3, None, blendmode='cv2.seamlessClone', display=False)
+
