@@ -31,8 +31,6 @@ def get_laplacian_pyramid(img_pyr, upscale=2, **kwargs):
     if not isinstance(img_pyr, list):           #als input image is en geen pyramid -> pyramid aanmaken (zie functiebeschrijving)
         img_pyr = get_gaussian_pyramid(img_pyr)
     for i in range(1, len(img_pyr)):
-        #if(img_pyr[i-1].shape != skimage.transform.pyramid_expand(img_pyr[i], upscale, channel_axis=2).shape):
-            #break
         images.append(img_pyr[i-1]-(skimage.transform.pyramid_expand(img_pyr[i], upscale, channel_axis=2)))
     #first laplacian is the same as the highest level gaussian
     images.append(img_pyr[-1])
@@ -62,9 +60,7 @@ def reconstruct_image_from_laplacian_pyramid(pyramid):
     reconstructed_image = pyramid[-1]
     for i in range(2, len(pyramid)+1):
         reconstructed_image = (pyramid[-i] + skimage.transform.pyramid_expand(reconstructed_image, 2, channel_axis=2))
-    #plt.imshow(reconstructed_image/255)
-    #plt.show()
-    return reconstructed_image / 255
+    return reconstructed_image.astype(int)
 
 if __name__ == "__main__":
     image = io.imread('./imgs/faces/superman.jpg')

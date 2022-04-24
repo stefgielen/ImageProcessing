@@ -4,12 +4,13 @@ from scipy.spatial import ConvexHull, Delaunay
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage.draw import polygon
-from pyramid_blending import get_laplacian_pyramid, reconstruct_image_from_laplacian_pyramid, get_gaussian_pyramid, plot_pyramid
+from pyramid_blending import get_laplacian_pyramid, reconstruct_image_from_laplacian_pyramid, get_gaussian_pyramid, \
+    plot_pyramid
 from Functions import plot_figures
+import cv2
 
 
 def get_mask(hull, output_shape):
-
     mask = np.zeros([output_shape[0], output_shape[1], 3])
     rowpoints = []
     colpoints = []
@@ -18,7 +19,7 @@ def get_mask(hull, output_shape):
         colpoints.append(hull.points[vertex][1])
 
     rr, cc = polygon(colpoints, rowpoints, output_shape)
-    mask[rr, cc,:] = 1
+    mask[rr, cc, :] = 1
 
     return mask
 
@@ -31,14 +32,14 @@ def padcrop(img1, img2shape):
     :return: cropped/padded image
     """
 
-    if img1.shape[0] < img2shape[0]:   #img1 is kleiner -> padden tot img2shape[0]
-        img1 = np.pad(img1, ((0, img2shape[0]-img1.shape[0]), (0, 0), (0, 0)), 'constant')
-    else:                               #img1 is groter ->  cropppen tot img2shape[0]
-        img1 = img1[:img2shape[0], :]
-    if img1.shape[1] < img2shape[1]:   # img1 is kleiner -> padden tot img2shape[1]
-        img1 = np.pad(img1, ((0, 0), (0, img2shape[1]-img1.shape[1]), (0, 0)), 'constant')
-    else:                               # img1 is groter ->  cropppen tot img2shape[1]
-        img1 = img1[:, :img2shape[1]]
+    if img1.shape[0] < img2shape[0]:  # img1 is kleiner -> padden tot img2shape[0]
+        img1 = np.pad(img1, ((0, img2shape[0] - img1.shape[0]), (0, 0), (0, 0)), 'constant')
+    else:  # img1 is groter ->  cropppen tot img2shape[0]
+        img1 = img1[:img2shape[0],:]
+        if img1.shape[1] < img2shape[1]:  # img1 is kleiner -> padden tot img2shape[1]
+            img1 = np.pad(img1, ((0, 0), (0, img2shape[1] - img1.shape[1]), (0, 0)), 'constant')
+        else:  # img1 is groter ->  cropppen tot img2shape[1]
+            img1 = img1[:, :img2shape[1]]
     return img1
 
 
@@ -61,7 +62,8 @@ def pyramidblend(imgor, warped, mask):
 
     return swapped
 
-def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1), display = True, flip_faces=(False,False)):
+
+def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1), display=True, flip_faces=(False, False)):
     """
     Swap face in img1 with face in img2 using the specified blend method.
     if img2==None then img1 should contain two faces and the faceorder argument specifies swapping order.
@@ -80,9 +82,30 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1), display =
         pts1 = pts[0]
         pts2 = pts[1]
 
+        #  if(flip_faces[0] and flip_faces[1]):
+        # if(flip_faces[0]): #True
+        """cut = (np.max(pts1[:, 0])+np.min(pts2[:, 0]))//2
+            part1 = img1[:, cut:]
+            part2 = img1[:, 0:cut]
+            imgf1 = img1
+            imgf2 = img2
+            im_flipped1 = np.fliplr(img1)
+        if(flip_faces[1]): #true
+            im_flipped2=np.fliplr(img2)
+
+        im1 = swap_faces(im_flipped1,img2,blendmode)
+        im2=swap_faces(im_flipped2,img1,blendmode)
+
+        im"""
+
     else:
         pts1 = get_points(img1)[0]
         pts2 = get_points(img2)[0]
+    # if faceorder== (0,1):
+    #      im = swap_faces(img1,img2,blendmode)
+    #   elif faceorder== (1,0):
+    #        im = swap_faces(img2,img1,blendmode)
+    # return im
 
     if display:
         if img2 is None:
@@ -176,14 +199,14 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1), display =
     # Step 4: warp image
     alpha = 0
     ptsm_alpha0 = (1 - alpha) * pts1 + alpha * pts2
-    alpha=1
-    ptsm_alpha1 =(1 - alpha) * pts1 + alpha * pts2
+    alpha = 1
+    ptsm_alpha1 = (1 - alpha) * pts1 + alpha * pts2
     if img2 is None:
-        warped1 = warp_image(img1, pts1, tris1, ptsm_alpha1, img1.shape)*255
-        warped2 = warp_image(img1, pts2, tris2, ptsm_alpha0, img1.shape)*255
+        warped1 = (warp_image(img1, pts1, tris1, ptsm_alpha1, img1.shape)*255).astype(int)
+        warped2 = (warp_image(img1, pts2, tris2, ptsm_alpha0, img1.shape)*255).astype(int)
     else:
-        warped1 = warp_image(img1, pts1, tris1, ptsm_alpha1, img2.shape)*255
-        warped2 = warp_image(img2, pts2, tris2, ptsm_alpha0, img1.shape)*255
+        warped1 = (warp_image(img1, pts1, tris1, ptsm_alpha1, img2.shape)*255).astype(int)
+        warped2 = (warp_image(img2, pts2, tris2, ptsm_alpha0, img1.shape)*255).astype(int)
 
     # Step 5: Create masks
     mask1 = get_mask(hull1, warped1.shape[:2])
@@ -192,30 +215,30 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1), display =
     if display:
         if img2 is None:
             img2 = np.copy(img1)
-        plots = [img1, mask1, warped2/255, img2, mask2, warped1/255]
+        plots = [img1, mask1, warped2, img2, mask2, warped1]
         titles = ["img1", "img1 mask", "img2 warped", "img2", "img2 mask", "img1 warped"]
         fig = plt.figure()
         for i in range(len(plots)):
-            ax = fig.add_subplot(2, 3, i+1)
+            ax = fig.add_subplot(2, 3, i + 1)
             ax.set_title(titles[i])
             ax.imshow(plots[i], cmap='gray')
         plt.show()
 
     # Step 6: Pad or crop to same size as image 1
     if img2 is not None:
-        mask1 = padcrop(mask1, img1.shape)      #mask van gezicht image 1
-        warped1 = padcrop(warped1, img2.shape)  #gewarpete gezicht image 2 in vorm image 1
+        mask1 = padcrop(mask1, img1.shape)  # mask van gezicht image 1
+        warped1 = padcrop(warped1, img2.shape)  # gewarpete gezicht image 2 in vorm image 1
         mask2 = padcrop(mask2, img2.shape)
         warped2 = padcrop(warped2, img1.shape)
 
     if display:
         if img2 is None:
             img2 = np.copy(img1)
-        plots = [img1, mask1, warped2/255, img2, mask2, warped1/255]
+        plots = [img1, mask1, warped2, img2, mask2, warped1]
         titles = ["img1", "img1 mask", "img2 warped", "img2", "img2 mask", "img1 warped"]
         fig = plt.figure()
         for i in range(len(plots)):
-            ax = fig.add_subplot(2, 3, i+1)
+            ax = fig.add_subplot(2, 3, i + 1)
             ax.set_title(titles[i])
             ax.imshow(plots[i], cmap='gray')
         plt.show()
@@ -224,29 +247,39 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1), display =
 
     if (img2 is None):
         if blendmode == 'alfa-blending':
-            swapped = ((warped1 * mask2) + (warped2*mask1) + img1 * (1 - mask1)*(1-mask2))/255
+            swapped = ((warped1 * mask2) + (warped2 * mask1) + img1 * (1 - mask1) * (1 - mask2)).astype(int)
             plt.imshow(swapped)
             plt.show()
         elif blendmode == 'pyramid':
             tempswapped = pyramidblend(img1, warped1, mask2)
             im1Lapl = get_laplacian_pyramid(tempswapped)
-            warpLapl = get_laplacian_pyramid(warped2/255)
+            warpLapl = get_laplacian_pyramid(warped2)
             maskGaus = get_gaussian_pyramid(mask1)
             blendLapl = []  # np.zeros_like(im1Lapl)
             for i in range(0, len(im1Lapl)):
                 blendLapl.append((im1Lapl[i] * (1 - maskGaus[i])) + (warpLapl[i] * maskGaus[i]))
 
-            swapped = reconstruct_image_from_laplacian_pyramid(blendLapl)*255
+            swapped = reconstruct_image_from_laplacian_pyramid(blendLapl).astype(int)
             plt.imshow(swapped)
             plt.show()
+        """elif blendmode=='cv2.seamlessClone':
+           # print(img1.shape[1]//2)
+            center1 = (img1[:,:,0].shape[1]//2,img1[:,:,0].shape[0]//2)
+            center2 
+            swapped1 = cv2.seamlessClone(warped1,img1,mask2,center2,cv2.NORMAL_CLONE)
+            swapped2 = cv2.seamlessClone(warped2,img1,mask1,center1,cv2.NORMAL_CLONE)
+            plt.imshow(swapped1)
+            plt.show()
+            plt.imshow(swapped2)
+            plt.show()"""
 
     else:
         if blendmode == 'alfa-blending':
-            swapped1 = (warped2 * mask1) + img1 * (1 - mask1)
-            swapped2 = (warped1 * mask2) + img2 * (1 - mask2)
-            plt.imshow(swapped1/255)
+            swapped1 = ((warped2 * mask1) + img1 * (1 - mask1)).astype(int)
+            swapped2 = ((warped1 * mask2) + img2 * (1 - mask2)).astype(int)
+            plt.imshow(swapped1)
             plt.show()
-            plt.imshow(swapped2/255)
+            plt.imshow(swapped2)
             plt.show()
 
         if blendmode == 'pyramid':
@@ -256,16 +289,27 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1), display =
             plt.show()
             plt.imshow(swapped2)
             plt.show()
+        if blendmode == 'cv2.seamlessClone':
+            center = (img2[:, :, 0].shape[1] // 2, img2[:, :, 0].shape[0] // 2)
+            swapped = cv2.seamlessClone(warped1, img2, mask2, center, cv2.NORMAL_CLONE)
+            plt.imshow("Face swap seamlessClone", swapped)
+            plt.show()
+
+
 # main
 if __name__ == "__main__":
     image1 = io.imread('./imgs/faces/superman.jpg')
     image2 = io.imread('./imgs/faces/nicolas_cage.jpg')
     image3 = io.imread('./imgs/faces/brangelina.jpg')
-    image4 = io.imread('/Users/stefgielen/Downloads/878873_1_seoimage4x3_bn-859569_e58c83605ff84e42832fce5b82595756.jpg')
-    image5 = io.imread('/Users/stefgielen/Downloads/https---static.nieuwsblad.be-Assets-Images_Upload-2020-08-11-dc59c00e-dbf1-11ea-8ffb-9e26f69cae24.jpg')
+    # image3 = io.imread('/Users/jeffm/Pictures/vroeger/jeff_maris.jpg')
+    image4 = io.imread('./imgs/faces/queen.jpg')
+    image5 = io.imread('./imgs/faces/ted_cruz.jpg')
+    # image4 = io.imread('/Users/stefgielen/Downloads/878873_1_seoimage4x3_bn-859569_e58c83605ff84e42832fce5b82595756.jpg')
+    # image5 = io.imread('/Users/stefgielen/Downloads/https---static.nieuwsblad.be-Assets-Images_Upload-2020-08-11-dc59c00e-dbf1-11ea-8ffb-9e26f69cae24.jpg')
 
+    #  swap_faces(image4, image5, blendmode='cv2.seamlessClone', flip_faces=(False,True))
 
-    swap_faces(image4, image5, blendmode="pyramid", flip_faces=(False,True))
-    swap_faces(image1, image2, blendmode="pyramid")
-    swap_faces(image3, None, blendmode='alfa-blending')
-    swap_faces(image3, None, blendmode='pyramid')
+    #swap_faces(image1, image2, blendmode='cv2.seamlessClone')
+    #swap_faces(image3, None, blendmode='alfa-blending')
+
+#  swap_faces(image3, None, blendmode='cv2.seamlessClone')
