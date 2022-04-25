@@ -88,7 +88,7 @@ def pyramidblend(imgor, warped, mask):
     return swapped
 
 
-def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1), display=True, flip_faces=(False, False)):
+def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1), display=True, flip_faces=(False, False),eerstemaalMirror=False,eerstemaalFaceOrder1=False,eerstemaalFaceOrder2=False):
     """
     Swap face in img1 with face in img2 using the specified blend method.
     if img2==None then img1 should contain two faces and the faceorder argument specifies swapping order.
@@ -106,32 +106,45 @@ def swap_faces(img1, img2=None, blendmode='pyramid', faceorder=(0, 1), display=T
         pts = get_points(img1)
         pts1 = pts[0]
         pts2 = pts[1]
-
-        #  if(flip_faces[0] and flip_faces[1]):
-        # if(flip_faces[0]): #True
-        """cut = (np.max(pts1[:, 0])+np.min(pts2[:, 0]))//2
-            part1 = img1[:, cut:]
-            part2 = img1[:, 0:cut]
-            imgf1 = img1
-            imgf2 = img2
-            im_flipped1 = np.fliplr(img1)
+ 
+        "afbeelding opsplitsen in twee aparte delen, dan spiegelen en uiteindelijk terug bijeen plakken = mirrored image"
+        rowmax = np.amin(pts1[:,0])
+        rowmin = np.amin(pts2[:,0])
+        mid=(rowmax+rowmin)//2 #basically spiegelpunt
+        part1 = img1[:, 0:mid]
+        #plt.imshow(part1)
+        #plt.show()
+        part2 = img1[:, mid:]
+       # plt.imshow(part2)
+       # plt.show()
+    
+        if(flip_faces[0]): #True 
+            im_mirrored1 = np.fliplr(part1)
+           # plt.imshow(im_mirrored1)
+           # plt.show()
+        else: 
+            im_mirrored1= part1
         if(flip_faces[1]): #true
-            im_flipped2=np.fliplr(img2)
-
-        im1 = swap_faces(im_flipped1,img2,blendmode)
-        im2=swap_faces(im_flipped2,img1,blendmode)
-
-        im"""
+            im_mirrored2=np.fliplr(part2)
+        else: 
+            im_mirrored2=part2
+        
+        tup=(im_mirrored1,im_mirrored2)
+        im_tot= np.hstack(tup)
+       # plt.imshow(im_tot)
+       # plt.show()
+        
+        if eerstemaalMirror: #ander infinity loop :(
+            im = swap_faces(im_tot, None,blendmode,eerstemaalMirror=False)
+            
 
     else:
         pts1 = get_points(img1)[0]
         pts2 = get_points(img2)[0]
-    # if faceorder== (0,1):
-    #      im = swap_faces(img1,img2,blendmode)
-    #   elif faceorder== (1,0):
-    #        im = swap_faces(img2,img1,blendmode)
-    # return im
-
+        if faceorder== (0,1) and eerstemaalFaceOrder1:
+            im_tot = swap_faces(img1,img2,blendmode,eerstemaalFaceOrder1=False)
+        elif faceorder== (1,0) and eerstemaalFaceOrder2:
+            im_tot = swap_faces(img2,img1,blendmode,eerstemaalFaceOrder2=False)
     if display:
         if img2 is None:
             fig = plt.figure()
@@ -338,8 +351,10 @@ if __name__ == "__main__":
 
     swap_faces(image4, image5, blendmode='cv2.seamlessClone', display=False)
 
-    #swap_faces(image1, image2, blendmode='cv2.seamlessClone')
-    #swap_faces(image3, None, blendmode='alfa-blending')
+  #  swap_faces(image1, image2, blendmode='cv2.seamlessClone',eerstemaalFaceOrder1=True)
+ #   swap_faces(image3, None, blendmode='alfa-blending')
+   # swap_faces(image3, None, blendmode='pyramid')
 
-    swap_faces(image3, None, blendmode='cv2.seamlessClone', display=False)
 
+    #swap_faces(image3, None, blendmode='cv2.seamlessClone', display=False)
+   # swap_faces(image3,blendmode='alfa-blending',display=False,flip_faces=(False, True),eerstemaalMirror=True) #alleen brad mirrored
