@@ -10,6 +10,9 @@ from skimage.draw import polygon, rectangle_perimeter
 import cv2
 from Piecewise_warp import warp_image 
 
+teller_lmarks=0
+teller_dtriang=0
+
 def add_corners(pts, image):
     """
     adds corner and edge points
@@ -24,7 +27,7 @@ def add_corners(pts, image):
     return pts
 
 
-def get_points(image):
+def get_points(image,lmarks,dtriang):
     """
     Uses the shape predictor 68 face landmarks to find the face recognition points in an image
     :param image:image
@@ -40,24 +43,39 @@ def get_points(image):
 
     pts = add_corners(pts, image)
     pts = pts[0]
+    global teller_lmarks
+    if(lmarks):
+        if teller_lmarks<2:
+            fig, (ax) = plt.subplots(nrows=1, ncols=1)
+            ax.set_title("img get_points")
+            ax.imshow(image,cmap='gray')
+            #ax.triplot(pts[:, 0], pts[:, 1], tris.simplices)
+            ax.plot(pts[:, 0], pts[:, 1], 'o')
+            plt.show()
+            teller_lmarks+=1
     return pts
 
 
-def get_triangular_mesh_t(image, pts):
+def get_triangular_mesh_t(image, pts,lmarks,dtriang):
     """
     :param image: image (only used when plotting the result)
     :param pts: points determined by the face landmarks predictor
     :return: points of triangles that devide the image in pieces
     """
+    global teller_dtriang
+
     tris = Delaunay(pts)
-   # fig, (ax) = plt.subplots(nrows=1, ncols=1)
-   # ax.imshow(image)
-   # ax.triplot(pts[:, 0], pts[:, 1], tris.simplices)
-   # plt.title("triangular mesh")
-   # plt.show()
+    if(dtriang):
+        if teller_dtriang<2: #tot twee zodat beide imgs worden geplot 
+            fig, (ax) = plt.subplots(nrows=1, ncols=1)
+            ax.imshow(image,cmap='gray')
+            ax.triplot(pts[:, 0], pts[:, 1], tris.simplices)
+            plt.title("triangular mesh")
+            plt.show()
+            teller_dtriang+=1
     return tris
 
-def face_morph1(img1,img2,alpha): #,lmarks=False,dtriang=False
+def face_morph1(img1,img2,alpha,lmarks=False,dtriang=False): 
     """
     deze functie gaat voor elke alpha waarde (1 per 1) morphen
     img1: image waarvan morphing start
@@ -73,11 +91,11 @@ def face_morph1(img1,img2,alpha): #,lmarks=False,dtriang=False
     #resize
     img2=resize(img2,img1.shape[:2])
     
-    pts1 = get_points(img1)
-    pts2 = get_points(img2)
+    pts1 = get_points(img1,lmarks,dtriang)
+    pts2 = get_points(img2,lmarks,dtriang)
 
-    tris1 = get_triangular_mesh_t(img1, pts1)
-    tris2 = get_triangular_mesh_t(img2, pts2)
+    tris1 = get_triangular_mesh_t(img1, pts1,lmarks,dtriang)
+    tris2 = get_triangular_mesh_t(img2, pts2,lmarks,dtriang)
 
     ptsm = (1 - alpha) * pts1 + alpha * pts2
 
@@ -89,7 +107,7 @@ def face_morph1(img1,img2,alpha): #,lmarks=False,dtriang=False
    # plt.show()
     return morphed
 
-def face_morph2(img1,img2,alphas):
+def face_morph2(img1,img2,alphas,lmarks=False,dtriang=False):
     """
     Deze functie zal over elke alpha waarde lopen via een for lus en dan voor elke alpha waarde 
     gebruik maken van functie face_morph1. Elke alpha waarde heeft zijn bijhorend beeld die worden opgeslaan de array
@@ -101,7 +119,7 @@ def face_morph2(img1,img2,alphas):
     """
     tot_frames=[]
     for i in alphas:
-        frame=face_morph1(img1,img2,i)
+        frame=face_morph1(img1,img2,i,lmarks,dtriang)
         print(i)
         tot_frames.append(frame)
     return tot_frames
@@ -118,15 +136,14 @@ def save_frames_to_video(file_path,frames,fps):
     for i in frames:
         writer.write(i)
 
-    writer.release() 
-    
-    
+    writer.release()
+
+
 if __name__ == "__main__":
-    
     img1 = './imgs/faces/daenerys.jpg'    #'./imgs/jeffmabilde.jpg'
     img2 ='./imgs/faces/gal_gadot.jpg'    #'./imgs/maris.jpg' #./imgs/stefmetzonnebril.jpg'
     p = "./shape_predictor_68_face_landmarks.dat"  #shape_predictor_68_face_landmarks_GTX
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor(p)
-    frames =face_morph2(img1,img2,alphas=np.linspace(0,1,30))
+    frames =face_morph2(img1,img2,alphas=np.linspace(0,1,30),lmarks=False,dtriang=True)
     save_frames_to_video('./imgs/my_morph_video_test.mp4',frames,30)
